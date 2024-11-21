@@ -68,6 +68,12 @@
                             <i class="fa fa-cogs"></i> Admin Dashboard
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white {{ request()->routeIs('settings.index') ? 'active' : '' }}"
+                            href="{{ route('settings.index') }}">
+                            <i class="fa fa-cogs"></i> Registration
+                        </a>
+                    </li>
                     @endif
 
                     <li class="nav-item">

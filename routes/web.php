@@ -8,6 +8,8 @@ use App\Http\Controllers\SubscriberController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Middleware\CheckRegistrationStatus;
 
 // Redirect root route to dashboard
 Route::get('/', function () {
@@ -19,6 +21,12 @@ Auth::routes();
 
 // Default home route
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::middleware([CheckRegistrationStatus::class])->group(function () {
+    // Registration routes
+    Auth::routes(['register' => true]); // Ensure 'register' => true is enabled here
+});
+
 
 // Routes accessible to all authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -74,4 +82,6 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
     
     // Log in as a user
     Route::get('/admin/login-as/{id}', [AdminController::class, 'loginAsUser'])->name('admin.login-as');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/toggle', [SettingsController::class, 'toggleRegistration'])->name('settings.toggle');
 });
