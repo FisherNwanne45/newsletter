@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+.cke_notification_warning {
+    display: none !important;
+}
+</style>
 <div class="d-flex justify-content-center" style="padding-top: 50px; background-color: #f8f9fa; min-height: 100vh;">
     <div class="container p-4 bg-white shadow rounded" style="max-width: 600px;">
         <h2 class="text-center mb-4">Create New Mail</h2>
@@ -13,7 +18,7 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <form id="newsletter-form" action="{{ route('newsletters.send') }}" method="POST">
+        <form id="newsletter-form" action="{{ route('newsletters.send') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Sender's Name Input -->
@@ -28,13 +33,20 @@
                 <input type="text" id="subject" name="subject" class="form-control" required>
             </div>
 
+            <!-- CKEditor for Content -->
             <div class="form-group mb-3">
                 <label for="content">Content</label>
                 <textarea id="content" name="content" class="form-control" rows="5" required></textarea>
-                <small class="form-text text-muted"><b>You can use shortcodes for personalized content to emails in a
-                        list </b><br>e.g
-                    <i>Hello
-                        [name], you are registered with [email]</i></small>
+                <small class="form-text text-muted"><b>You can use shortcodes for personalized content in emails</b><br>
+                    e.g. <i>Hello [name], you are registered with [email]</i></small>
+            </div>
+
+            <!-- Attachment -->
+            <div class="form-group mb-3">
+                <label for="attachment">Attachment (Optional)</label>
+                <input type="file" id="attachment" name="attachment" class="form-control"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                <small class="form-text text-muted">You can attach an image, PDF, or MS Word document.</small>
             </div>
 
             <!-- Choose whether to send to new subscriber or from an existing list -->
@@ -75,23 +87,38 @@
 
             <button type="submit" class="btn btn-primary w-100">Send Newsletter</button>
         </form>
-
-        <!-- Progress Bar for Email Sending -->
-        <div id="progress-section" style="display: none;">
-            <h5>Sending Progress</h5>
-            <p id="progress-message">Sending: <span id="sent-count">0</span> of <span id="total-count"></span> emails
-                sent.</p>
-            <p id="skipped-message">Skipped: <span id="skipped-count">0</span> invalid emails.</p>
-            <div class="progress">
-                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
-            </div>
-        </div>
     </div>
 </div>
 
-<!-- Script to toggle between the forms based on the radio button selection -->
+<!-- Updated CKEditor Script (Version 4.25.0) -->
+<script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    // Attach CKEditor to the 'content' textarea
+    CKEDITOR.replace('content', {
+        toolbar: [{
+                name: 'basicstyles',
+                items: ['Bold', 'Italic', 'Underline', 'Strike']
+            },
+            {
+                name: 'paragraph',
+                items: ['NumberedList', 'BulletedList']
+            },
+            {
+                name: 'styles',
+                items: ['Format', 'FontSize']
+            },
+            {
+                name: 'colors',
+                items: ['TextColor', 'BGColor']
+            },
+            {
+                name: 'insert',
+                items: ['Link', 'Unlink']
+            },
+        ]
+    });
+
     const newSubscriberRadio = document.getElementById("new_subscriber");
     const subscriptionListRadio = document.getElementById("subscription_list");
     const newSubscriberEmailField = document.getElementById("new_subscriber_email");
@@ -120,36 +147,5 @@ document.addEventListener("DOMContentLoaded", function() {
         subscriptionListField.style.display = "block";
     }
 });
-
-$('#newsletter-form').on('submit', function(e) {
-    e.preventDefault(); // Prevent the default form submission
-
-    let formData = new FormData(this);
-    $('#progress-section').show(); // Show the progress section
-    $('#total-count').text(formData.get('subscription_list_id') ? formData.get('subscription_list_id').length :
-        1); // Show total count based on the list
-
-    $.ajax({
-        url: $(this).attr('action'),
-        type: 'POST',
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function(response) {
-            updateProgress(response);
-        },
-        error: function() {
-            alert('There was an error sending the newsletter.');
-        }
-    });
-});
-
-function updateProgress(response) {
-    $('#sent-count').text(response.sent);
-    $('#skipped-count').text(response.skipped);
-    let progress = (response.sent / response.total) * 100;
-    $('#progress-bar').css('width', progress + '%');
-}
 </script>
-
 @endsection

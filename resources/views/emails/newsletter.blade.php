@@ -34,6 +34,10 @@
 
         .email-body {
             padding: 20px;
+            line-height: 1.6;
+            /* Improve readability */
+            white-space: pre-line;
+            /* For line breaks in plain text */
         }
 
         .email-footer {
@@ -61,7 +65,8 @@
 
             <!-- Body of the Email -->
             <div class="email-body">
-                <p>{{ $content }}</p>
+                <!-- Display the raw HTML content -->
+                {!! $content !!}
             </div>
 
             <!-- Footer with Disclaimer and External Link -->

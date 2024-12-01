@@ -20,9 +20,22 @@
         <form action="{{ route('subscribers.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <!-- Select Subscription List -->
+            <!-- Toggle Between Add or Create -->
             <div class="form-group mb-4">
-                <label for="list_id">Add to an existing List</label>
+                <label>Select an Action:</label>
+                <div>
+                    <input type="radio" name="list_action" id="add_to_existing" value="existing" checked>
+                    <label for="add_to_existing">Add to Existing List</label>
+                </div>
+                <div>
+                    <input type="radio" name="list_action" id="create_new_list" value="new">
+                    <label for="create_new_list">Create New List</label>
+                </div>
+            </div>
+
+            <!-- Select Subscription List -->
+            <div class="form-group mb-4" id="existing_list_group">
+                <label for="list_id">Add to an Existing List</label>
                 <select name="list_id" id="list_id" class="form-control">
                     <option value="">-- Select List --</option>
                     @foreach ($subscriptionLists as $list)
@@ -34,9 +47,9 @@
                 @enderror
             </div>
 
-            <!-- OR Add New List -->
-            <div class="form-group mb-4">
-                <label for="new_list_name">Or, Create a New List</label>
+            <!-- Create New List -->
+            <div class="form-group mb-4 d-none" id="new_list_group">
+                <label for="new_list_name">Create a New List</label>
                 <input type="text" name="new_list_name" id="new_list_name" class="form-control"
                     placeholder="Enter new list name">
                 @error('new_list_name')
@@ -58,4 +71,31 @@
         </form>
     </div>
 </div>
+
+<script>
+// JavaScript to toggle fields based on radio button selection
+document.addEventListener('DOMContentLoaded', function() {
+    const addToExistingRadio = document.getElementById('add_to_existing');
+    const createNewListRadio = document.getElementById('create_new_list');
+    const existingListGroup = document.getElementById('existing_list_group');
+    const newListGroup = document.getElementById('new_list_group');
+
+    function toggleFields() {
+        if (addToExistingRadio.checked) {
+            existingListGroup.classList.remove('d-none');
+            newListGroup.classList.add('d-none');
+        } else {
+            existingListGroup.classList.add('d-none');
+            newListGroup.classList.remove('d-none');
+        }
+    }
+
+    // Initial toggle state
+    toggleFields();
+
+    // Add event listeners to radio buttons
+    addToExistingRadio.addEventListener('change', toggleFields);
+    createNewListRadio.addEventListener('change', toggleFields);
+});
+</script>
 @endsection
